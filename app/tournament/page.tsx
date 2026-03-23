@@ -45,16 +45,19 @@ export default function TournamentPage() {
     setScoreB("")
   }
 
-  function handleSubmitScore() {
-    if (!selectedMatch || scoreA === "" || scoreB === "") return
-    const a = parseInt(scoreA)
-    const b = parseInt(scoreB)
-    if (isNaN(a) || isNaN(b) || a === b) return
+function handleSubmitScore() {
+  if (!selectedMatch || scoreA === "" || scoreB === "") return
+  const a = parseInt(scoreA)
+  const b = parseInt(scoreB)
+  if (isNaN(a) || isNaN(b) || a === b) return
 
-    const updated = updateBracket(tournament.bracket!, selectedMatch.id, a, b)
-    setTournament({ ...tournament, bracket: updated })
-    closeModal()
-  }
+  const currentTournament = tournament
+  if (!currentTournament?.bracket) return
+
+  const updated = updateBracket(currentTournament.bracket, selectedMatch.id, a, b)
+  setTournament({ ...currentTournament, bracket: updated })
+  closeModal()
+}
 
   function handleReset() {
     resetTournament()
