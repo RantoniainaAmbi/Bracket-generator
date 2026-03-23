@@ -5,24 +5,18 @@ function nextPowerOfTwo(n: number): number {
   return Math.pow(2, Math.ceil(Math.log2(n)))
 }
 
-function shuffle<T>(array: T[]): T[] {
-  return [...array].sort(() => Math.random() - 0.5)
-}
-
-export function generateBracket(teams: Team[], seeded = false): Bracket {
-  const ordered = seeded ? [...teams] : shuffle(teams)
-  const size = nextPowerOfTwo(ordered.length)
+export function generateBracket(teams: Team[]): Bracket {
+  const size = nextPowerOfTwo(teams.length)
 
   const padded: (Team | null)[] = [
-    ...ordered,
-    ...Array(size - ordered.length).fill(null),
+    ...teams,
+    ...Array(size - teams.length).fill(null),
   ]
 
   const firstRound: Match[] = []
   for (let i = 0; i < padded.length; i += 2) {
     const teamA = padded[i]
     const teamB = padded[i + 1]
-
     const winner = teamB === null ? teamA : teamA === null ? teamB : null
 
     firstRound.push({
