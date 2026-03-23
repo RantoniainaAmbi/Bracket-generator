@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏆 Bracket Generator
 
-## Getting Started
+Application web de création et gestion de tournois sportifs, construite avec Next.js 14.
 
-First, run the development server:
+## Fonctionnalités
 
+- Création de tournoi en élimination directe ou phase de poules
+- Drag & drop pour organiser les équipes avant le tirage
+- Tirage aléatoire en un clic
+- Génération automatique du bracket
+- Saisie des scores et avancement automatique du bracket
+- Classement des poules en temps réel (points, buts, différence de buts)
+- Tirage croisé pour le passage poules → bracket final (1er groupe A vs 2ème groupe B)
+- Persistance des données au rafraîchissement (Zustand persist)
+
+## Stack technique
+
+- **Next.js 14** — App Router
+- **TypeScript** — typage strict
+- **Tailwind CSS** — styling
+- **Zustand** — state management avec persistance localStorage
+- **dnd-kit** — drag & drop
+
+## Installation
 ```bash
+git clone https://github.com/ton-pseudo/bracket-generator
+cd bracket-generator
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvre [http://localhost:3000](http://localhost:3000) dans ton navigateur.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Structure du projet
+```
+bracket-generator/
+├── app/
+│   ├── page.tsx          # Page d'accueil — création du tournoi
+│   ├── tournament/       # Bracket élimination directe
+│   └── groups/           # Phase de poules
+├── components/
+│   └── DraggableTeamList # Liste d'équipes avec drag & drop
+├── lib/
+│   ├── bracket.ts        # Algo génération et mise à jour du bracket
+│   ├── groups.ts         # Algo poules, classement, qualifiés
+│   └── store.ts          # Store Zustand avec persistance
+└── types/
+    └── index.ts          # Types TypeScript
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Utilisation
 
-## Learn More
+### Élimination directe
+1. Entre le nom du tournoi et les équipes
+2. Organise l'ordre avec le drag & drop ou tire au sort
+3. Clique sur un match pour saisir le score
+4. Le vainqueur avance automatiquement au tour suivant
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Phase de poules
+1. Choisis le nombre de poules
+2. Les équipes sont réparties automatiquement
+3. Saisis les scores de chaque match de poule
+4. Une fois tous les matchs joués, lance le bracket final
+5. Les 2 premiers de chaque poule s'affrontent en tirage croisé
