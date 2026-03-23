@@ -7,6 +7,7 @@ import { generateBracket } from "@/lib/brackets"
 import { generateGroups } from "@/lib/groups"
 import { Team, TournamentFormat } from "@/types"
 import { v4 as uuidv4 } from "uuid"
+import { DraggableTeamList } from "@/components/DraggableTeamList"
 
 export default function Home() {
   const router = useRouter()
@@ -98,6 +99,11 @@ export default function Home() {
                 </button>
               ))}
             </div>
+            <p className="text-xs text-gray-500">
+              {format === "elimination"
+                ? "Chaque défaite élimine l'équipe. Le bracket est généré selon l'ordre des équipes ci-dessous."
+                : "Les équipes s'affrontent dans des poules. Les 2 premiers de chaque poule se qualifient pour le bracket final."}
+            </p>
           </div>
 
           {format === "groups" && (
@@ -118,9 +124,26 @@ export default function Home() {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">
-              Équipes <span className="text-gray-500">({teams.length} ajoutées)</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-300">
+                Équipes <span className="text-gray-500">({teams.length} ajoutées)</span>
+              </label>
+
+              {format === "elimination" && teams.length >= 2 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setTeams((prev) => [...prev].sort(() => Math.random() - 0.5))}
+                    className="text-xs px-3 py-1.5 rounded-lg border bg-gray-800 border-gray-700 text-gray-400 hover:border-violet-500 hover:text-violet-400 transition-all"
+                  >
+                    🔀 Aléatoire
+                  </button>
+                  <div className="text-xs px-3 py-1.5 rounded-lg border border-violet-500 text-violet-400 bg-violet-500/10">
+                    ⠿ Drag & drop
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-2">
               <input
                 type="text"
@@ -139,22 +162,23 @@ export default function Home() {
             </div>
 
             {teams.length > 0 && (
-              <ul className="space-y-2 mt-3">
-                {teams.map((team) => (
-                  <li
-                    key={team.id}
-                    className="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-2"
-                  >
-                    <span className="text-sm">{team.name}</span>
-                    <button
-                      onClick={() => removeTeam(team.id)}
-                      className="text-gray-500 hover:text-red-400 transition-colors text-lg leading-none"
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <DraggableTeamList
+                teams={teams}
+                onReorder={setTeams}
+                onRemove={removeTeam}
+              />
+            )}
+
+            {format === "elimination" && teams.length >= 2 && (
+              <p className="text-xs text-gray-500">
+                Glisse les équipes pour définir l'ordre du bracket, ou utilise le tirage aléatoire. L'équipe en position 1 affronte la position 2, la 3 affronte la 4, etc.
+              </p>
+            )}
+
+            {format === "groups" && teams.length >= 2 && (
+              <p className="text-xs text-gray-500">
+                Les équipes sont réparties automatiquement en {groupCount} poules de manière aléatoire.
+              </p>
             )}
           </div>
 
@@ -165,6 +189,7 @@ export default function Home() {
           >
             Créer le tournoi →
           </button>
+
         </div>
       </div>
     </main>
