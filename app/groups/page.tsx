@@ -47,18 +47,21 @@ export default function GroupsPage() {
   }
 
 function handleSubmitScore() {
-  if (!selectedMatch || scoreA === "" || scoreB === "" || !tournament) return
+  if (!selectedMatch || scoreA === "" || scoreB === "") return
   const a = parseInt(scoreA)
   const b = parseInt(scoreB)
   if (isNaN(a) || isNaN(b)) return
 
-  const updatedGroups = tournament.groups!.map((g) =>
+  const currentTournament = tournament
+  if (!currentTournament?.groups) return
+
+  const updatedGroups = currentTournament.groups.map((g) =>
     g.id === selectedMatch.groupId
       ? updateGroupMatch(g, selectedMatch.match.id, a, b)
       : g
   )
 
-  setTournament({ ...tournament, groups: updatedGroups })
+  setTournament({ ...currentTournament, groups: updatedGroups })
   closeModal()
 }
 
