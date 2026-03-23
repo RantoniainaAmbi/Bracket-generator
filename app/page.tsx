@@ -1,65 +1,172 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useTournamentStore } from "@/lib/store"
+import { generateBracket } from "@/lib/brackets"
+import { generateGroups } from "@/lib/groups"
+import { Team, TournamentFormat } from "@/types"
+import { v4 as uuidv4 } from "uuid"
 
 export default function Home() {
+  const router = useRouter()
+  const { setTournament } = useTournamentStore()
+
+  const [name, setName] = useState("")
+  const [format, setFormat] = useState<TournamentFormat>("elimination")
+  const [teamInput, setTeamInput] = useState("")
+  const [teams, setTeams] = useState<Team[]>([])
+  const [groupCount, setGroupCount] = useState(2)
+
+  function addTeam() {
+    const trimmed = teamInput.trim()
+    if (!trimmed || teams.find((t) => t.name === trimmed)) return
+    setTeams([...teams, { id: uuidv4(), name: trimmed }])
+    setTeamInput("")
+  }
+
+  function removeTeam(id: string) {
+    setTeams(teams.filter((t) => t.id !== id))
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") addTeam()
+  }
+
+  function handleCreate() {
+    if (!name.trim() || teams.length < 2) return
+
+    if (format === "elimination") {
+      setTournament({
+        id: uuidv4(),
+        name,
+        format,
+        teams,
+        bracket: generateBracket(teams),
+      })
+      router.push("/tournament")
+    } else {
+      setTournament({
+        id: uuidv4(),
+        name,
+        format,
+        teams,
+        groups: generateGroups(teams, groupCount),
+      })
+      router.push("/groups")
+    }
+  }
+
+  const canCreate = name.trim().length > 0 && teams.length >= 2
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-lg space-y-8">
+
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">🏆 Bracket Generator</h1>
+          <p className="text-gray-400">Crée et gère tes tournois en quelques secondes</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <div className="bg-gray-900 rounded-2xl p-6 space-y-6 border border-gray-800">
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Nom du tournoi</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Championnat Été 2025"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Format</label>
+            <div className="grid grid-cols-2 gap-3">
+              {(["elimination", "groups"] as TournamentFormat[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFormat(f)}
+                  className={`py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    format === f
+                      ? "bg-violet-600 border-violet-500 text-white"
+                      : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
+                  }`}
+                >
+                  {f === "elimination" ? "⚡ Élimination directe" : "🔵 Phase de poules"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {format === "groups" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">
+                Nombre de poules
+              </label>
+              <select
+                value={groupCount}
+                onChange={(e) => setGroupCount(Number(e.target.value))}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              >
+                {[2, 3, 4, 6, 8].map((n) => (
+                  <option key={n} value={n}>{n} poules</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">
+              Équipes <span className="text-gray-500">({teams.length} ajoutées)</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={teamInput}
+                onChange={(e) => setTeamInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Nom de l'équipe..."
+                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+              <button
+                onClick={addTeam}
+                className="bg-violet-600 hover:bg-violet-500 px-4 py-2.5 rounded-lg font-medium transition-colors"
+              >
+                Ajouter
+              </button>
+            </div>
+
+            {teams.length > 0 && (
+              <ul className="space-y-2 mt-3">
+                {teams.map((team) => (
+                  <li
+                    key={team.id}
+                    className="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-2"
+                  >
+                    <span className="text-sm">{team.name}</span>
+                    <button
+                      onClick={() => removeTeam(team.id)}
+                      className="text-gray-500 hover:text-red-400 transition-colors text-lg leading-none"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <button
+            onClick={handleCreate}
+            disabled={!canCreate}
+            className="w-full py-3 rounded-xl font-semibold text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-violet-600 hover:bg-violet-500 active:scale-95"
           >
-            Documentation
-          </a>
+            Créer le tournoi →
+          </button>
         </div>
-      </main>
-    </div>
-  );
+      </div>
+    </main>
+  )
 }
