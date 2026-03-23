@@ -46,25 +46,26 @@ export default function GroupsPage() {
     setScoreB("")
   }
 
-  function handleSubmitScore() {
-    if (!selectedMatch || scoreA === "" || scoreB === "") return
-    const a = parseInt(scoreA)
-    const b = parseInt(scoreB)
-    if (isNaN(a) || isNaN(b)) return
+function handleSubmitScore() {
+  if (!selectedMatch || scoreA === "" || scoreB === "" || !tournament) return
+  const a = parseInt(scoreA)
+  const b = parseInt(scoreB)
+  if (isNaN(a) || isNaN(b)) return
 
-    const updatedGroups = tournament.groups!.map((g) =>
-      g.id === selectedMatch.groupId
-        ? updateGroupMatch(g, selectedMatch.match.id, a, b)
-        : g
-    )
+  const updatedGroups = tournament.groups!.map((g) =>
+    g.id === selectedMatch.groupId
+      ? updateGroupMatch(g, selectedMatch.match.id, a, b)
+      : g
+  )
 
-    setTournament({ ...tournament, groups: updatedGroups })
-    closeModal()
-  }
+  setTournament({ ...tournament, groups: updatedGroups })
+  closeModal()
+}
 
 function handleGoToBracket() {
+  if (!tournament) return
   const qualified = getQualified(groups, 2)
-  const bracket = generateBracket(qualified, true) // tirage croisé respecté
+  const bracket = generateBracket(qualified)
   setTournament({ ...tournament, bracket })
   router.push("/tournament")
 }
