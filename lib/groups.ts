@@ -109,7 +109,14 @@ function recalculateStandings(teams: Team[], matches: GroupMatch[]): GroupStandi
 }
 
 export function getQualified(groups: Group[], perGroup: number): Team[] {
-  return groups.flatMap((group) =>
-    group.standings.slice(0, perGroup).map((s) => s.team)
-  )
+  const winners = groups.map((g) => g.standings[0].team)   
+  const runners = groups.map((g) => g.standings[1].team)  
+
+  const qualified: Team[] = []
+  for (let i = 0; i < groups.length; i++) {
+    qualified.push(winners[i])                              
+    qualified.push(runners[(i + 1) % groups.length])       
+  }
+
+  return qualified
 }

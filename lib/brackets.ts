@@ -9,13 +9,13 @@ function shuffle<T>(array: T[]): T[] {
   return [...array].sort(() => Math.random() - 0.5)
 }
 
-export function generateBracket(teams: Team[]): Bracket {
-  const shuffled = shuffle(teams)
-  const size = nextPowerOfTwo(shuffled.length)
+export function generateBracket(teams: Team[], seeded = false): Bracket {
+  const ordered = seeded ? [...teams] : shuffle(teams)
+  const size = nextPowerOfTwo(ordered.length)
 
   const padded: (Team | null)[] = [
-    ...shuffled,
-    ...Array(size - shuffled.length).fill(null),
+    ...ordered,
+    ...Array(size - ordered.length).fill(null),
   ]
 
   const firstRound: Match[] = []

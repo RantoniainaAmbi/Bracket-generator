@@ -62,12 +62,12 @@ export default function GroupsPage() {
     closeModal()
   }
 
-  function handleGoToBracket() {
-    const qualified = getQualified(groups, 2) 
-    const bracket = generateBracket(qualified)
-    setTournament({ ...tournament, bracket })
-    router.push("/tournament")
-  }
+function handleGoToBracket() {
+  const qualified = getQualified(groups, 2)
+  const bracket = generateBracket(qualified, true) // tirage croisé respecté
+  setTournament({ ...tournament, bracket })
+  router.push("/tournament")
+}
 
   function handleReset() {
     resetTournament()
